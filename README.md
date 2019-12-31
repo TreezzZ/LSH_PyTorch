@@ -1,4 +1,4 @@
-# Similarity search in high dimensions via hashing
+# Similarity Search in High Dimensions via Hashing
 
 ## REQUIREMENTS
 `pip install -r requirements.txt`
