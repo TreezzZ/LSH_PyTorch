@@ -1,6 +1,6 @@
 import torch
 
-from utils.evaluate import mean_average_precision
+from utils.evaluate import mean_average_precision, pr_curve
 
 
 def train(
@@ -25,8 +25,9 @@ def train(
         topk(int): Calculate top k data map.
 
     Returns
-        mAP(float): Mean Average Precision.
+        checkpoint(dict): Checkpoint.
     """
+    # Initialization
     query_data, retrieval_data, query_targets, retrieval_targets = query_data.to(device), retrieval_data.to(device), query_targets.to(device), retrieval_targets.to(device)
 
     # Generate random projection matrix
@@ -46,4 +47,26 @@ def train(
         topk,
     )
 
-    return mAP
+    # P-R curve
+    P, R = pr_curve(
+        query_code,
+        retrieval_code,
+        query_targets,
+        retrieval_targets,
+        device,
+    )
+
+    # Save checkpoint
+    checkpoint = {
+        'qB': query_code,
+        'rB': retrieval_code,
+        'qL': query_targets,
+        'rL': retrieval_targets,
+        'W': W,
+        'P': P,
+        'R': R,
+        'map': mAP,
+    }
+    torch.save(checkpoint, 'checkpoints/code_{}_map_{:.4f}.pt'.format(code_length, mAP))
+
+    return checkpoint
